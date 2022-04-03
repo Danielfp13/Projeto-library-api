@@ -4,6 +4,7 @@ import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -72,7 +74,18 @@ public class BookControllerTest {
 
     @Test
     @DisplayName("Deve lançar erro de valiação quando não houver dados suficientes.")
-    public void createInvalidBookTest() {
+    public void createInvalidBookTest() throws Exception {
+
+        String json = new ObjectMapper().writeValueAsString(new BookDTO());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post(BOOK_API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+        mvc.perform(request)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("errors", Matchers.hasSize(3)));
 
     }
 }
