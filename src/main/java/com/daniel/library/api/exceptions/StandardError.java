@@ -9,9 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @AllArgsConstructor
-@NoArgsConstructor
 public class StandardError implements Serializable {
     private LocalDateTime timestamp;
     private Integer status;

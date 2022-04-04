@@ -1,5 +1,6 @@
 package com.daniel.library.api.exceptions;
 
+import com.daniel.library.model.service.exceptions.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -32,6 +33,14 @@ public class ResourceExceptionHandler {
             errors.addErrors(x.getField(),x.getDefaultMessage());
         }
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errors);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<StandardError> businessException(BusinessException ex, HttpServletRequest request) {
+        StandardError error = new Validation(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value()
+                , "Erro de Integridade.", ex.getMessage(), request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
 }
