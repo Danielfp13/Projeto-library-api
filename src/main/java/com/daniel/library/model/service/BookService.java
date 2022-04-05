@@ -2,6 +2,8 @@ package com.daniel.library.model.service;
 
 import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,5 +15,8 @@ public interface BookService {
     void delete(Long id);
 
     BookDTO update(Long id, BookDTO bookDTO);
+
+    Page<Book> find(Book filter, Pageable pageRequest);
+
 }
 

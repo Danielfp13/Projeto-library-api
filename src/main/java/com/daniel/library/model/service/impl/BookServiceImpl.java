@@ -10,6 +10,8 @@ import com.daniel.library.model.service.exceptions.ObjectNotFondException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -48,5 +50,10 @@ public class BookServiceImpl implements BookService {
         book.setTitle(bookDTO.getTitle());
         BeanUtils.copyProperties(repository.save(book), bookDTO);
         return bookDTO;
+    }
+
+    @Override
+    public Page<Book> find(Book filter, Pageable pageRequest) {
+        return null;
     }
 }
