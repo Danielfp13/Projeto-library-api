@@ -1,9 +1,11 @@
 package com.daniel.library.service;
 
+import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.repository.BookRepository;
 import com.daniel.library.model.service.BookService;
 import com.daniel.library.model.service.exceptions.BusinessException;
+import com.daniel.library.model.service.exceptions.ObjectNotFondException;
 import com.daniel.library.model.service.impl.BookServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,9 +13,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.beans.Beans;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +64,88 @@ public class BookServiceTest {
         Throwable exception = Assertions.catchThrowable(() -> service.save(book));
         assertThat(exception).isInstanceOf(BusinessException.class).hasMessage("Isbn já cadastrado.");
         Mockito.verify(repository, Mockito.never()).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve obter um livro por Id")
+    public void findByIdTest() {
+        Long id = 1l;
+        Book book = createValidBook();
+        book.setId(id);
+
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(book));
+
+        //execucao
+        Book bookSalvo = service.findById(id);
+
+        //verificacoes
+        assertThat(bookSalvo).isNotNull();
+        assertThat(bookSalvo.getId()).isEqualTo(id);
+        assertThat(bookSalvo.getAuthor()).isEqualTo(book.getAuthor());
+        assertThat(bookSalvo.getIsbn()).isEqualTo(book.getIsbn());
+        assertThat(bookSalvo.getTitle()).isEqualTo(book.getTitle());
+    }
+
+
+    @Test
+    @DisplayName("Deve retornar notfound ao obter um livro por Id quando ele não existe na base.")
+    public void bookNotFoundByIdTest() {
+        Long id = 1l;
+        Mockito.when(repository.findById(id))
+                .thenThrow(new ObjectNotFondException("Não existe livro com esse id."));
+
+        org.junit.jupiter.api.Assertions.assertThrows(ObjectNotFondException.class,
+                () -> service.findById(id));
+        Mockito.verify(repository, Mockito.never()).deleteById(id);
+        try {
+            service.findById(id);
+        } catch (Exception e) {
+            assertThat(ObjectNotFondException.class).isEqualTo(e.getClass());
+            assertThat("Não existe livro com esse id.").isEqualTo(e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("Deve deletar um livro.")
+    public void deleteBookTest() {
+        long id = 1l;
+        Book book = createValidBook();
+
+        Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(Optional.of(book));
+        Mockito.doNothing().when(repository).deleteById(Mockito.anyLong());
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> service.delete(id));
+        Mockito.verify(repository, Mockito.times(1)).deleteById(Mockito.anyLong());
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um livro.")
+    public void updateBookTest() {
+        //cenário
+        long id = 1l;
+
+        //simulacao
+        Book currentBook = new Book(1L, "repo", "title repo", "123");
+        Book bookToUpdate = new Book(1L, "aut user", "title alt", "123");
+        Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(Optional.of(currentBook));
+        Mockito.when(repository.save(Mockito.any(Book.class))).thenReturn(bookToUpdate);
+
+        BookDTO bookDTO = new BookDTO();
+        BeanUtils.copyProperties(bookToUpdate, bookDTO);
+
+        //exeucao
+        bookDTO = service.update(id, bookDTO);
+
+        //verificacoes
+        assertThat(bookDTO.getId()).isEqualTo(bookToUpdate.getId());
+        assertThat(bookDTO.getTitle()).isEqualTo(bookToUpdate.getTitle());
+        assertThat(bookDTO.getIsbn()).isEqualTo(bookToUpdate.getIsbn());
+        assertThat(bookDTO.getAuthor()).isEqualTo(bookToUpdate.getAuthor());
+
+    }
+
+
+    private Book createValidBook() {
+        return new Book(1L, "Maria", "Homem mal", "12ws");
     }
 
 }

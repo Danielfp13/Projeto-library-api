@@ -1,10 +1,15 @@
 package com.daniel.library.model.service.impl;
 
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
+import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.repository.BookRepository;
 import com.daniel.library.model.service.BookService;
 import com.daniel.library.model.service.exceptions.BusinessException;
+import com.daniel.library.model.service.exceptions.ObjectNotFondException;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,9 +23,30 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public Book save(Book book) {
-        if(repository.existsByIsbn(book.getIsbn())){
+        if (repository.existsByIsbn(book.getIsbn())) {
             throw new BusinessException("Isbn já cadastrado.");
         }
         return repository.save(book);
+    }
+
+    @Override
+    public Book findById(Long id) {
+        return repository.findById(id).orElseThrow(
+                () -> new ObjectNotFondException("Não existe book com esse id."));
+    }
+
+    @Override
+    public void delete(Long id) {
+        findById(id);
+        repository.deleteById(id);
+    }
+
+    @Override
+    public BookDTO update(Long id, BookDTO bookDTO) {
+        Book book = findById(id);
+        book.setAuthor(bookDTO.getAuthor());
+        book.setTitle(bookDTO.getTitle());
+        BeanUtils.copyProperties(repository.save(book), bookDTO);
+        return bookDTO;
     }
 }

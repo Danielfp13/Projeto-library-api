@@ -1,18 +1,15 @@
 package com.daniel.library.api.exceptions;
 
 import com.daniel.library.model.service.exceptions.BusinessException;
+import com.daniel.library.model.service.exceptions.ObjectNotFondException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -43,4 +40,11 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(ObjectNotFondException.class)
+    public ResponseEntity<StandardError> objectNotFound(ObjectNotFondException ex, HttpServletRequest request) {
+        StandardError error = new Validation(LocalDateTime.now(), HttpStatus.NOT_FOUND.value()
+                , "Não existe.", ex.getMessage(), request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 }
