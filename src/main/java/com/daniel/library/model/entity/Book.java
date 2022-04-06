@@ -12,8 +12,6 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Book {
 
     @Id

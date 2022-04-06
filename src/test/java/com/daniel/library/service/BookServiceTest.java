@@ -96,8 +96,8 @@ public class BookServiceTest {
     @DisplayName("Deve retornar notfound ao obter um livro por Id quando ele não existe na base.")
     public void bookNotFoundByIdTest() {
         Long id = 1l;
-        Mockito.when(repository.findById(id))
-                .thenThrow(new ObjectNotFondException("Não existe livro com esse id."));
+       // Mockito.when(repository.findById(id))
+               // .thenThrow(new ObjectNotFondException("Não existe livro com esse id."));
 
         org.junit.jupiter.api.Assertions.assertThrows(ObjectNotFondException.class,
                 () -> service.findById(id));
@@ -106,7 +106,7 @@ public class BookServiceTest {
             service.findById(id);
         } catch (Exception e) {
             assertThat(ObjectNotFondException.class).isEqualTo(e.getClass());
-            assertThat("Não existe livro com esse id.").isEqualTo(e.getMessage());
+            assertThat("Não existe book com esse id.").isEqualTo(e.getMessage());
         }
     }
 

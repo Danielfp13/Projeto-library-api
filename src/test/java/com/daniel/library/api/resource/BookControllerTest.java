@@ -211,14 +211,10 @@ public class BookControllerTest {
     @DisplayName("Deve filtrar livros")
     public void findBooksTest() throws Exception{
 
-        Long id = 1l;
+        Long id = 1L;
 
-        Book book = Book.builder()
-                .id(id)
-                .title(createNewBook().getTitle())
-                .author(createNewBook().getAuthor())
-                .isbn(createNewBook().getIsbn())
-                .build();
+        Book book = new Book(id, createNewBook().getTitle(), createNewBook().getAuthor()
+                ,createNewBook().getIsbn() );
 
         BDDMockito.given( service.find(Mockito.any(Book.class), Mockito.any(Pageable.class)) )
                 .willReturn( new PageImpl<Book>( Arrays.asList(book), PageRequest.of(0,100), 1 )   );
