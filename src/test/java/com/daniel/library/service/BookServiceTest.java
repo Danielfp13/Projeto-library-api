@@ -92,7 +92,6 @@ public class BookServiceTest {
         assertThat(bookSalvo.getTitle()).isEqualTo(book.getTitle());
     }
 
-
     @Test
     @DisplayName("Deve retornar notfound ao obter um livro por Id quando ele não existe na base.")
     public void bookNotFoundByIdTest() {
