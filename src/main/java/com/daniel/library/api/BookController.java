@@ -3,6 +3,8 @@ package com.daniel.library.api;
 import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.service.BookService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -22,12 +24,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/books")
 @AllArgsConstructor
 @Slf4j
+@Api("API Biblioteca.")
 public class BookController {
 
     private BookService service;
     private ModelMapper modelMapper;
 
     @PostMapping
+    @ApiOperation("Salvar livro.")
     public ResponseEntity<BookDTO> create(@RequestBody @Valid BookDTO dto) {
         Book entity = modelMapper.map(dto, Book.class);
         entity = service.save(entity);
@@ -37,6 +41,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation("Buscar livro por ID.")
     ResponseEntity<BookDTO> findById(@PathVariable Long id) {
         log.info("Obtendo um livro com identificador: {}", id);
         BookDTO bookDTO = modelMapper.map(service.findById(id), BookDTO.class);
@@ -44,6 +49,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation("Excluir livro.")
     ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("Deletando um livro com identificador: {}", id);
         service.delete(id);
@@ -51,13 +57,15 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<BookDTO> updateController(@PathVariable Long id, @RequestBody @Valid BookDTO bookDTO) {
+    @ApiOperation("Alterar livro.")
+    ResponseEntity<BookDTO> update(@PathVariable Long id, @RequestBody @Valid BookDTO bookDTO) {
         log.info("Alterando informações do livro com identificador: {}", id);
         bookDTO = service.update(id, bookDTO);
         return ResponseEntity.ok().body(bookDTO);
     }
 
     @GetMapping
+    @ApiOperation("Busca paginada com parâmetros.")
     public Page<BookDTO> find(BookDTO dto, Pageable pageRequest ){
         Book filter = modelMapper.map(dto, Book.class);
         Page<Book> result = service.find(filter, pageRequest);
