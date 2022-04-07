@@ -1,4 +1,4 @@
-package com.daniel.library.api;
+package com.daniel.library.api.resources;
 
 import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
@@ -66,7 +66,7 @@ public class BookController {
 
     @GetMapping
     @ApiOperation("Busca paginada com parâmetros.")
-    public Page<BookDTO> find(BookDTO dto, Pageable pageRequest ){
+    public Page<BookDTO> find(BookDTO dto, Pageable pageRequest) {
         Book filter = modelMapper.map(dto, Book.class);
         Page<Book> result = service.find(filter, pageRequest);
         List<BookDTO> list = result.getContent()
@@ -74,6 +74,6 @@ public class BookController {
                 .map(entity -> modelMapper.map(entity, BookDTO.class))
                 .collect(Collectors.toList());
 
-        return new PageImpl<>( list, pageRequest, result.getTotalElements() );
+        return new PageImpl<>(list, pageRequest, result.getTotalElements());
     }
 }
