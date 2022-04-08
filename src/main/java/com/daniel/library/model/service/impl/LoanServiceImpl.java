@@ -27,12 +27,12 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public Loan findById(Long id) {
         return loanRepository.findById(id)
-                .orElseThrow( () -> new ObjectNotFondException("Não existe emprestimo com esse id."));
+                .orElseThrow(() -> new ObjectNotFondException("Não existe emprestimo com esse id."));
     }
 
     @Override
     public void update(Loan loan) {
-
+        loanRepository.save(loan);
     }
 
 }
