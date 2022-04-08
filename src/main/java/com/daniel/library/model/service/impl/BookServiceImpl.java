@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -63,5 +64,12 @@ public class BookServiceImpl implements BookService {
                         .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
         );
         return repository.findAll(example, pageRequest);
+    }
+
+    @Override
+    public Optional<Book> findBookByIsbn(String isbn) {
+        return Optional
+                .of(repository.findByIsbn(isbn))
+                .orElseThrow(() ->new ObjectNotFondException("Não existe book com esse isbn."));
     }
 }
