@@ -82,7 +82,7 @@ public class LoanControllerTest {
         BDDMockito.given(bookService.findBookByIsbn("123")).willReturn(book);
 
         BDDMockito.given(loanService.save(Mockito.any(Loan.class)))
-                .willThrow(new BusinessException("Livro Já emprestado"));
+                .willThrow(new BusinessException("Livro já emprestado."));
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(LOAN_API)
                 .accept(MediaType.APPLICATION_JSON)
@@ -92,7 +92,7 @@ public class LoanControllerTest {
         mvc.perform(request)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("error", Matchers.is("Erro de Integridade.")))
-                .andExpect(jsonPath("message").value("Livro Já emprestado"))
+                .andExpect(jsonPath("message").value("Livro já emprestado."))
         ;
     }
 
