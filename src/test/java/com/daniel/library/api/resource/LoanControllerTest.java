@@ -2,6 +2,7 @@ package com.daniel.library.api.resource;
 
 import com.daniel.library.api.resources.LoanController;
 import com.daniel.library.model.dto.LoanDTO;
+import com.daniel.library.model.dto.ReturnedLoanDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.service.BookService;
@@ -26,7 +27,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -94,6 +97,29 @@ public class LoanControllerTest {
                 .andExpect(jsonPath("error", Matchers.is("Erro de Integridade.")))
                 .andExpect(jsonPath("message").value("Livro já emprestado."))
         ;
+    }
+
+    @Test
+    @DisplayName("Deve retornar um livro")
+    public void returnBookTest() throws Exception{
+        //cenário { returned: true }
+        ReturnedLoanDTO dto = new ReturnedLoanDTO(true);
+        Loan loan =  new Loan(1L, "Fulano","fulano@email.com", null, LocalDate.now(),null);
+
+        BDDMockito.given(loanService.findById(Mockito.anyLong()))
+                .willReturn(loan);
+
+        String json = new ObjectMapper().writeValueAsString(dto);
+
+        mvc.perform(
+                patch(LOAN_API.concat("/1"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect( status().isOk() );
+
+        Mockito.verify(loanService, Mockito.times(1)).update(loan);
+
     }
 
 }
