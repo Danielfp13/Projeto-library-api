@@ -1,20 +1,21 @@
 package com.daniel.library.model.service.impl;
 
+import com.daniel.library.model.dto.LoanFilterDTO;
 import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.repository.LoanRepository;
 import com.daniel.library.model.service.LoanService;
 import com.daniel.library.model.service.exceptions.BusinessException;
 import com.daniel.library.model.service.exceptions.ObjectNotFondException;
+import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class LoanServiceImpl implements LoanService {
 
     private LoanRepository loanRepository;
-
-    public LoanServiceImpl(LoanRepository loanRepository) {
-        this.loanRepository = loanRepository;
-    }
 
     @Override
     public Loan save(Loan loan) {
@@ -31,8 +32,13 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public void update(Loan loan) {
-        loanRepository.save(loan);
+    public Loan update(Loan loan) {
+        return loanRepository.save(loan);
+    }
+
+    @Override
+    public Page<Loan> find(LoanFilterDTO loanFilterDTO, PageRequest pageRequest) {
+        return null;
     }
 
 }

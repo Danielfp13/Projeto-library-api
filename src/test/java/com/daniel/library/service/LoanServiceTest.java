@@ -1,5 +1,6 @@
 package com.daniel.library.service;
 
+import com.daniel.library.model.dto.LoanFilterDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.repository.LoanRepository;
@@ -12,13 +13,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,14 +103,14 @@ public class LoanServiceTest {
 
     @Test
     @DisplayName(" Deve obter as informações de um empréstimo pelo ID")
-    public void getLoanDetaisTest(){
+    public void getLoanDetaisTest() {
         //cenário
-        Long id = 1l;
+        Long id = 1L;
 
         Loan loan = createLoan();
         loan.setId(id);
 
-        Mockito.when( loanRepository.findById(id) ).thenReturn(Optional.of(loan));
+        Mockito.when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
 
         //execucao
         Loan result = loanService.findById(id);
@@ -117,12 +122,57 @@ public class LoanServiceTest {
         assertThat(result.getBook()).isEqualTo(loan.getBook());
         assertThat(result.getLoanDate()).isEqualTo(loan.getLoanDate());
 
-        Mockito.verify( loanRepository ).findById(id);
+        Mockito.verify(loanRepository).findById(id);
 
     }
 
+    @Test
+    @DisplayName("Deve atualizar um empréstimo.")
+    public void updateLoanTest() {
+        Loan loan = createLoan();
+        loan.setId(1L);
+        loan.setReturned(true);
+
+        when(loanRepository.save(loan)).thenReturn(loan);
+
+        Loan updatedLoan = loanService.update(loan);
+
+        assertThat(updatedLoan.getReturned()).isTrue();
+        Mockito.verify(loanRepository).save(loan);
+    }
+
+    @Test
+    @DisplayName("Deve filtrar empréstimos pelas propriedades")
+    public void findLoanTest(){
+        //cenario
+        LoanFilterDTO loanFilterDTO = new LoanFilterDTO("Fulano","321");
+
+        Loan loan = createLoan();
+        loan.setId(1L);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Loan> lista = Arrays.asList(loan);
+
+        Page<Loan> page = new PageImpl<Loan>(lista, pageRequest, lista.size());
+        when( loanRepository.findByBookIsbnOrCustomer(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(PageRequest.class))
+        )
+                .thenReturn(page);
+
+        //execucao
+        Page<Loan> result = loanService.find( loanFilterDTO, pageRequest );
+
+
+        //verificacoes
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).isEqualTo(lista);
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+    }
+
     private Loan createLoan() {
-        return  new Loan(1L, "Fulano","fulano@email.com", null, LocalDate.now(),false);
+        return new Loan(1L, "Fulano", "fulano@email.com", null, LocalDate.now(), false);
     }
 
 }
