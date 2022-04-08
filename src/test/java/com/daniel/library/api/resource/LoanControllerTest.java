@@ -6,7 +6,9 @@ import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.service.BookService;
 import com.daniel.library.model.service.LoanService;
+import com.daniel.library.model.service.exceptions.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,10 +26,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -54,7 +54,7 @@ public class LoanControllerTest {
         String json = new ObjectMapper().writeValueAsString(dto);
 
         Book book = new Book(1L, null, null, "123");
-        BDDMockito.given(bookService.findBookByIsbn("123")).willReturn(Optional.of(book));
+        BDDMockito.given(bookService.findBookByIsbn("123")).willReturn(book);
 
         Loan loan = new Loan(1L, "Fulano", null, book, LocalDate.now(), true);
         BDDMockito.given(loanService.save(Mockito.any(Loan.class))).willReturn(loan);
@@ -69,6 +69,31 @@ public class LoanControllerTest {
                 .andExpect(content().string("1"))
         ;
 
+    }
+
+    @Test
+    @DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro emprestado.")
+    public void loanedBookErrorOnCreateLoanTest() throws Exception {
+
+        LoanDTO dto = new LoanDTO(1L, "123", "Fulano", "fulano.@email.com", null);
+        String json = new ObjectMapper().writeValueAsString(dto);
+
+        Book book = new Book(1L, "Maria", "Ana", "123");
+        BDDMockito.given(bookService.findBookByIsbn("123")).willReturn(book);
+
+        BDDMockito.given(loanService.save(Mockito.any(Loan.class)))
+                .willThrow(new BusinessException("Livro Já emprestado"));
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(LOAN_API)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        mvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("error", Matchers.is("Erro de Integridade.")))
+                .andExpect(jsonPath("message").value("Livro Já emprestado"))
+        ;
     }
 
 }
