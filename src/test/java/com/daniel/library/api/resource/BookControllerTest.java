@@ -1,5 +1,6 @@
 package com.daniel.library.api.resource;
 
+import com.daniel.library.api.resources.BookController;
 import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.service.BookService;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@WebMvcTest
+@WebMvcTest(controllers = BookController.class)
 @AutoConfigureMockMvc
 public class BookControllerTest {
 
