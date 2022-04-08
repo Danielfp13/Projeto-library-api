@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public interface BookService {
     Book save(Book any);
@@ -18,5 +20,6 @@ public interface BookService {
 
     Page<Book> find(Book filter, Pageable pageRequest);
 
+    Optional<Book> findBookByIsbn(String isbn);
 }
 
