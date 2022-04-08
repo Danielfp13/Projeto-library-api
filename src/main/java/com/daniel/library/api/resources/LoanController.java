@@ -16,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/loans")
@@ -28,8 +29,8 @@ public class LoanController {
 
     @PostMapping
     public ResponseEntity<Long> create(@RequestBody LoanDTO dto) {
-        Book book = bookService.findBookByIsbn(dto.getIsbn()).get();
-        Loan entity = new Loan(null, dto.getCustomer(), null, book, LocalDate.now(), true);
+        Book book = bookService.findBookByIsbn(dto.getIsbn());
+        Loan entity = new Loan(null, dto.getCustomer(), dto.getEmail(), book, LocalDate.now(), true);
         entity = loanService.save(entity);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(entity.getId()).toUri();
         return ResponseEntity.created(uri).body(entity.getId());
