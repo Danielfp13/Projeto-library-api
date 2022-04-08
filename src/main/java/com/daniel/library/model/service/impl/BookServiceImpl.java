@@ -67,9 +67,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Optional<Book> findBookByIsbn(String isbn) {
-        return Optional
-                .of(repository.findByIsbn(isbn))
-                .orElseThrow(() ->new ObjectNotFondException("Não existe book com esse isbn."));
+    public Book findBookByIsbn(String isbn) {
+        return repository.findByIsbn(isbn)
+                .orElseThrow(() -> new ObjectNotFondException("Não existe book com esse isbn."));
     }
 }

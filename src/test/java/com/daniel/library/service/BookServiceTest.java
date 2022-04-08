@@ -22,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.beans.Beans;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -96,8 +95,8 @@ public class BookServiceTest {
     @DisplayName("Deve retornar notfound ao obter um livro por Id quando ele não existe na base.")
     public void bookNotFoundByIdTest() {
         Long id = 1l;
-       // Mockito.when(repository.findById(id))
-               // .thenThrow(new ObjectNotFondException("Não existe livro com esse id."));
+        // Mockito.when(repository.findById(id))
+        // .thenThrow(new ObjectNotFondException("Não existe livro com esse id."));
 
         org.junit.jupiter.api.Assertions.assertThrows(ObjectNotFondException.class,
                 () -> service.findById(id));
@@ -150,7 +149,7 @@ public class BookServiceTest {
 
     @Test
     @DisplayName("Deve filtrar livros pelas propriedades")
-    public void findBookTest(){
+    public void findBookTest() {
         //cenario
         Book book = createValidBook();
 
@@ -158,7 +157,7 @@ public class BookServiceTest {
 
         List<Book> lista = Arrays.asList(book);
         Page<Book> page = new PageImpl<>(lista, pageRequest, 1);
-        Mockito.when( repository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class)))
+        Mockito.when(repository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class)))
                 .thenReturn(page);
 
         //execucao
@@ -174,17 +173,32 @@ public class BookServiceTest {
 
     @Test
     @DisplayName("deve obter um livro pelo isbn")
-    public void getBookByIsbnTest(){
+    public void getBookByIsbnTest() {
         String isbn = "1230";
-        Mockito.when(repository.findByIsbn(isbn)).thenReturn( Optional.of(new Book(1L, null, null, isbn )) );
+        Mockito.when(repository.findByIsbn(isbn)).thenReturn(Optional.of(new Book(1L, null, null, isbn)));
 
-        Optional<Book> book = service.findBookByIsbn(isbn);
+        Book book = service.findBookByIsbn(isbn);
 
-        assertThat(book.isPresent()).isTrue();
-        assertThat(book.get().getId()).isEqualTo(1l);
-        assertThat(book.get().getIsbn()).isEqualTo(isbn);
+        assertThat(book).isNotNull();
+        assertThat(book.getId()).isEqualTo(1L);
+        assertThat(book.getIsbn()).isEqualTo(isbn);
 
         Mockito.verify(repository, Mockito.times(1)).findByIsbn(isbn);
+    }
+
+    @Test
+    @DisplayName("Deve retornar notfound tentar obter um livro por ISBN quando ele não existe na base.")
+    public void bookNotFoundByIsbnTest() {
+        String isbn = "234";
+
+        org.junit.jupiter.api.Assertions.assertThrows(ObjectNotFondException.class,
+                () -> service.findBookByIsbn(isbn));
+        try {
+            service.findBookByIsbn(isbn);
+        } catch (Exception e) {
+            assertThat(ObjectNotFondException.class).isEqualTo(e.getClass());
+            assertThat("Não existe book com esse isbn.").isEqualTo(e.getMessage());
+        }
     }
 
     private Book createValidBook() {
