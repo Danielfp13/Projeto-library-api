@@ -4,28 +4,30 @@ import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.repository.LoanRepository;
 import com.daniel.library.model.service.LoanService;
 import com.daniel.library.model.service.exceptions.BusinessException;
+import com.daniel.library.model.service.exceptions.ObjectNotFondException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanServiceImpl implements LoanService {
 
-    private LoanRepository repository;
+    private LoanRepository loanRepository;
 
-    public LoanServiceImpl(LoanRepository repository) {
-        this.repository = repository;
+    public LoanServiceImpl(LoanRepository loanRepository) {
+        this.loanRepository = loanRepository;
     }
 
     @Override
     public Loan save(Loan loan) {
-        if (repository.existsByBookAndNotReturned(loan.getBook())) {
+        if (loanRepository.existsByBookAndNotReturned(loan.getBook())) {
             throw new BusinessException("Livro já emprestado.");
         }
-        return repository.save(loan);
+        return loanRepository.save(loan);
     }
 
     @Override
     public Loan findById(Long id) {
-        return null;
+        return loanRepository.findById(id)
+                .orElseThrow( () -> new ObjectNotFondException("Não existe emprestimo com esse id."));
     }
 
     @Override
