@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -58,15 +59,37 @@ public class LoanRepositoryTest {
     }
 
 
+
+    @Test
+    @DisplayName("Deve obter empréstimos cuja data emprestimo for menor ou igual a tres dias atras e nao retornados")
+    public void findByLoanDateLessThanAndNotReturnedTest(){
+        Loan loan = createAndPersistLoan( LocalDate.now().minusDays(5) );
+
+        List<Loan> result = repository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+
+        Assertions.assertThat(result).hasSize(1).contains(loan);
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio quando não houver emprestimos atrasados.")
+    public void notFindByLoanDateLessThanAndNotReturnedTest(){
+        Loan loan = createAndPersistLoan( LocalDate.now());
+
+        List<Loan> result = repository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+
+        Assertions.assertThat(result).isEmpty();
+    }
+
     public Loan createAndPersistLoan(LocalDate loanDate) {
         Book book = new Book(null, "Fulano", "As aventuras", "54f4d");
         entityManager.persist(book);
 
-        Loan loan = new Loan(null, "Fulano", "fulano@emmail.com", book, LocalDate.now(), false);
+        Loan loan = new Loan(null, "Fulano", "fulano@emmail.com", book, loanDate, false);
 
         entityManager.persist(loan);
 
         return loan;
     }
+
 }
 

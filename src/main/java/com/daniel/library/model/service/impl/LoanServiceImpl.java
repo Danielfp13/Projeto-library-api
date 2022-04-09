@@ -1,6 +1,7 @@
 package com.daniel.library.model.service.impl;
 
 import com.daniel.library.model.dto.LoanFilterDTO;
+import com.daniel.library.model.entity.Book;
 import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.repository.LoanRepository;
 import com.daniel.library.model.service.LoanService;
@@ -8,9 +9,11 @@ import com.daniel.library.model.service.exceptions.BusinessException;
 import com.daniel.library.model.service.exceptions.ObjectNotFondException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -39,8 +42,18 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable) {
-        return loanRepository.findByBookIsbnOrCustomer( filterDTO.getIsbn(), filterDTO.getCustomer(), pageable );
+        return loanRepository.findByBookIsbnOrCustomer(filterDTO.getIsbn(), filterDTO.getCustomer(), pageable);
     }
 
+    @Override
+    public Page<Loan> findLoansByBook(Book book, Pageable pageable) {
+        return loanRepository.findByBook(book, pageable);
+    }
 
+    @Override
+    public List<Loan> findAllLateLoans() {
+        final Integer loanDays = 4;
+        LocalDate threeDaysAgo = LocalDate.now().minusDays(loanDays);
+        return loanRepository.findByLoanDateLessThanAndNotReturned(threeDaysAgo);
+    }
 }
