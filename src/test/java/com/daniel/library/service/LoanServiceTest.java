@@ -156,16 +156,14 @@ public class LoanServiceTest {
         when( loanRepository.findByBookIsbnOrCustomer(
                 Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(PageRequest.class))
-        )
+                Mockito.any(PageRequest.class)))
                 .thenReturn(page);
 
         //execucao
         Page<Loan> result = loanService.find( loanFilterDTO, pageRequest );
 
-
         //verificacoes
-        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(1L);
         assertThat(result.getContent()).isEqualTo(lista);
         assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);

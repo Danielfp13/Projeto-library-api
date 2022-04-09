@@ -4,6 +4,7 @@ import com.daniel.library.model.dto.LoanFilterDTO;
 import com.daniel.library.model.entity.Loan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 public interface LoanService {
 
@@ -13,5 +14,5 @@ public interface LoanService {
 
     Loan update(Loan loan);
 
-    Page<Loan> find(LoanFilterDTO loanFilterDTO, PageRequest pageRequest);
+    Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable);
 }
