@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -197,9 +198,32 @@ public class LoanServiceTest {
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);
     }
 
+    @Test
+    @DisplayName("Deve buscar emprestimos com 4 ou mais dias.")
+    public void findAllLateLoansTest() {
+        final Integer loanDays = 4;
+        LocalDate threeDaysAgo = LocalDate.now().minusDays(loanDays);
 
+        Loan loan = createLoan();
+        loan.setLoanDate(threeDaysAgo);
+        List<Loan> loanList = Arrays.asList(loan);
+        BDDMockito.given(loanRepository.findByLoanDateLessThanAndNotReturned(Mockito.any(LocalDate.class)))
+                        .willReturn(loanList);
+        List<Loan> response = loanService.findAllLateLoans();
+
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(1).isEqualTo(response.size());
+        Assertions.assertThat(Loan.class).isEqualTo( response.get(0).getClass());
+        Assertions.assertThat(loan.getId()).isEqualTo(response.get(0).getId());
+        Assertions.assertThat(loan.getCustomer()).isEqualTo( response.get(0).getCustomer());
+        Assertions.assertThat(loan.getCustomerEmail()).isEqualTo( response.get(0).getCustomerEmail());
+        Assertions.assertThat(loan.getReturned()).isEqualTo( response.get(0).getReturned());
+
+       Mockito.verify(loanRepository).findByLoanDateLessThanAndNotReturned(threeDaysAgo);
+    }
     private Loan createLoan() {
-        return new Loan(1L, "Fulano", "fulano@email.com", null, LocalDate.now(), false);
+        return new Loan(1L, "Fulano", "fulano@email.com", null,
+                LocalDate.now(), false);
     }
 
 }
