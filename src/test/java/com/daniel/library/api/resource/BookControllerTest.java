@@ -3,6 +3,7 @@ package com.daniel.library.api.resource;
 import com.daniel.library.api.resources.BookController;
 import com.daniel.library.model.dto.BookDTO;
 import com.daniel.library.model.entity.Book;
+import com.daniel.library.model.entity.Loan;
 import com.daniel.library.model.service.BookService;
 import com.daniel.library.model.service.LoanService;
 import com.daniel.library.model.service.exceptions.BusinessException;
@@ -119,7 +120,8 @@ public class BookControllerTest {
         BDDMockito.given(bookService.save(Mockito.any(Book.class)))
                 .willThrow(new BusinessException("Isbn já cadastrado."));
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+        MockHttpServletRequestBuilder request;
+        request = MockMvcRequestBuilders
                 .post(BOOK_API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -204,12 +206,12 @@ public class BookControllerTest {
                 .content(json);
 
         mvc
-              .perform(request)
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("id").value(1L))
-              .andExpect(jsonPath("title").value(createNewBook().getTitle()))
-              .andExpect(jsonPath("author").value(createNewBook().getAuthor()))
-              .andExpect(jsonPath("isbn").value("001"));
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(1L))
+                .andExpect(jsonPath("title").value(createNewBook().getTitle()))
+                .andExpect(jsonPath("author").value(createNewBook().getAuthor()))
+                .andExpect(jsonPath("isbn").value("001"));
     }
 
 
@@ -242,6 +244,36 @@ public class BookControllerTest {
         ;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+    @Test
+    @DisplayName("Deve buscar pagina de livros emprestados")
+    public void findLoansBokkTest() throws Exception {
+
+        Long id = 1L;
+
+        Book book = new Book(id, createNewBook().getTitle(), createNewBook().getAuthor()
+                , createNewBook().getIsbn());
+        Loan loan = createNewLoan();
+        BDDMockito.given(bookService.findById(Mockito.anyLong())).willReturn(book);
+
+        BDDMockito.given(loanService.findLoansByBook(Mockito.any(Book.class), Mockito.any(Pageable.class)))
+                .willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0, 100), 1));
+
+        String queryString = String.format("?page=0&size=100");
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(BOOK_API.concat("/" + id + "/loans/" + queryString))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(jsonPath("totalElements").value(1))
+                .andExpect(jsonPath("pageable.pageSize").value(100))
+                .andExpect(jsonPath("pageable.pageNumber").value(0))
+        ;
+    }
 
     BookDTO createNewBookDTO() {
         return new BookDTO(1L, "Artur", "As aventuras", "001");
@@ -249,5 +281,9 @@ public class BookControllerTest {
 
     Book createNewBook() {
         return new Book(1L, "Artur", "As aventuras", "001");
+    }
+
+    Loan createNewLoan() {
+        return new Loan(1L, "Marcos", "marcos@email", createNewBook(), null, true);
     }
 }
