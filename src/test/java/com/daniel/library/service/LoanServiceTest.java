@@ -169,6 +169,35 @@ public class LoanServiceTest {
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);
     }
 
+
+    @Test
+    @DisplayName("Deve buscar livros emprestados")
+    public void findLoansByBookTest(){
+        //cenario
+        Book book = new Book(1L, "maria", "Água limpa", "123");
+
+        Loan loan = createLoan();
+        loan.setId(1L);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Loan> lista = Arrays.asList(loan);
+
+        Page<Loan> page = new PageImpl<Loan>(lista, pageRequest, lista.size());
+        when( loanRepository.findByBook(
+                Mockito.any(Book.class),
+                Mockito.any(PageRequest.class)))
+                .thenReturn(page);
+
+        //execucao
+        Page<Loan> result = loanService.findLoansByBook( book, pageRequest );
+
+        //verificacoes
+        assertThat(result.getTotalElements()).isEqualTo(1L);
+        assertThat(result.getContent()).isEqualTo(lista);
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+    }
+
+
     private Loan createLoan() {
         return new Loan(1L, "Fulano", "fulano@email.com", null, LocalDate.now(), false);
     }
